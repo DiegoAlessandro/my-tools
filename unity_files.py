@@ -30,7 +30,7 @@ def collect_files(dir_path):
         file_path = '{}/{}'.format(dir_path, file_name)
         print('processing... {}'.format(file_path))
         with codecs.open(file_path, "r", "Shift-JIS", "ignore") as f:
-            reader = csv.reader(f)
+            reader = csv.reader((line.replace('\0','') for line in f))
             l = [row for row in reader]
             try:
                 col_num = l[0].index('spice id')
@@ -55,7 +55,10 @@ if __name__ == '__main__':
     spice_id_list = deduplication(spice_id_list)
 
     out_file_name = '重複削除_{}'.format("{0:%Y%m%d%H%M%S}".format(datetime.datetime.now()))
-    out_file_path = '{}/{}/{}.csv'.format('/'.join(dir_path.split('/')[:-1]), 'out', out_file_name)
+    out_file_path = '{}/{}/{}.csv'.format(dir_path, 'out', out_file_name)
+    if os.path.isdir('{}/{}'.format(dir_path, 'out')) is False:
+        os.mkdir('{}/{}'.format(dir_path, 'out'))
+
     with open(out_file_path, 'w') as f:
         writer = csv.writer(f, lineterminator='\n')  # 改行コード（\n）を指定しておく
         for i in spice_id_list:
